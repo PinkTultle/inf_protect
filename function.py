@@ -11,7 +11,7 @@ def SBOX(message,way): #message는 1바이트값 범위는 1~255, way가 'en'이
         return (h.iloc[0,0])
 
 
-def PBOX_left(message,num):
+def PBOX_left(message,num):#왼쪽 시프트일때 비트가 왼쪽으로 오버하여 값손상시 -255처리 
     for i in range(num) : 
         message <<= 1
         if message >= 255 :
@@ -19,7 +19,8 @@ def PBOX_left(message,num):
     return message
 
             
-def PBOX_light(message,num):
+def PBOX_light(message,num): #오른쪽 비트 시프트 첫 자리 1인지 판단하여 1일 경우 True값
+                             #True일 경우 
     for i in range(num) :
         if message & 0b00000001 == 1:    state = True 
         else : state = False
@@ -37,7 +38,7 @@ def split(message, size=8):
 
 '''
 
-
+print("섹시한 현서")
 
 a = input('평문 입력 : ')
 
