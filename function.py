@@ -4,10 +4,10 @@ import pandas as pd
 def SBOX(message,way): #message는 1바이트값 범위는 1~255, way가 'en'이면 암호화 'dec'면 복호화
     sbox = pd.read_csv('S-BOX.csv',names= ['of','after'],header=None)
     if way == 'en':
-        return hex(sbox.iloc[message,1])
+        return int(sbox.iloc[message,1])
     if way == 'dec':
         h = sbox[sbox['after'] == message]
-        return hex(h.iloc[0,0])
+        return int(h.iloc[0,0])
 
 
 def PBOX_left(message,num):#왼쪽 시프트일때 비트가 왼쪽으로 오버하여 값손상시 -255처리 
@@ -28,13 +28,6 @@ def PBOX_light(message,num): #오른쪽 비트 시프트 첫 자리 1인지 판�
             message |= 0b10000000
     return message
 
-b = PBOX_left(0xda,1)
-print(hex(b))
-'''
-def split(message, size=8):
-    return [message[i:i + size] for i in range(0, len(message), size)]
-
-'''
 
 a = input('평문 입력 : ')
 
@@ -42,23 +35,21 @@ bb = bytes(a,'utf-8')
 
 print(bb)
 
+chiper_m = bytearray()
+
 for i in range(len(bb)) :
     d = SBOX(bb[i],'en')
-    d = bytes(d, 'utf-8')
-    d = PBOX_left(int(d),3)
     print(d)
-    #print(chi)
+    d = PBOX_left(d,1)
+    print(d)
+    '''
+    chiper = (d).to_bytes(1, byteorder="little")
+    chiper.decode()
+    chiper_m.extend(chiper)
+    print(chiper_m)
 
+chiper_m.decode('utf-8')
+print(chiper_m)
 
-#print(int())
-
+#16진수로 병경후 바이트형으로 변경
 '''
-a = SBOX(a,'en')
-print(a)
-print(bin(a))
-
-a = PBOX_light(a,4)
-
-print(a)
-print(bin(a))'''
-
