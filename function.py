@@ -33,14 +33,17 @@ a = input('평문 입력 : ')
 
 bb = bytes(a,'utf-8')
 
+print('인코딩 : ',end = '')
 print(bb)
 
 chiper_m = bytearray()
 
 for i in range(len(bb)) :
     d = SBOX(bb[i],'en')
+    print('sbox : ', end = '')
     print(d)
     d = PBOX_left(d,1)
+    print('pbox :',end = '')
     print(d)
     '''
     chiper = (d).to_bytes(1, byteorder="little")
