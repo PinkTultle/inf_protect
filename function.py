@@ -1,5 +1,4 @@
 #기능들 함수로 구현
-from matplotlib.pyplot import close
 import pandas as pd
 
 def SBOX(message,way): #message는 1바이트값 범위는 1~255, way가 'en'이면 암호화 'dec'면 복호화
@@ -38,36 +37,44 @@ print('인코딩 : ',end = '')
 print(bb)
 
 chiper_m = []
+hoho = []
 
 for i in range(len(bb)) :
     d = SBOX(bb[i],'en')
-    print('sbox : ', end = '')
-    print(d)
+    #print('sbox : ', end = '')
+    #print(d)
     d = PBOX_left(d,1)
-    print('pbox :',end = '')
-    print(d)
+    #print('pbox :',end = '')
+    #print(d)
     chiper_m.append(chr(d))
+
     
-chiper_m = ''.join(chiper_m)
-print(chiper_m)
+chiper_p = ''.join(chiper_m)
+print(chiper_p)
 
-f = open("암호.txt", 'w', encoding= 'utf-8')
-f.write(chiper_m)
-f.close()
+#위에 까지하여 암호화
+#여기부터 복호화
+
+plain = bytearray()
+
+for i in range(len(chiper_p)) :
+    gen = PBOX_light(ord(chiper_p[i]),1)
+    #print('pbox :',end = '')
+    #print(gen)
+    sjd = SBOX(gen,'dec')
+    #print('sbox : ', end = '')
+    #print(sjd)
+    god = (sjd).to_bytes(1, byteorder="little")
+    #print(god)
+    plain.extend(god)
+
+plain_text = plain.decode('utf-8')
+
+#print(plain)
 
 
-#디코딩 복호화 마지막 단계에서 사용
-'''
-    chiper = (d).to_bytes(1, byteorder="little")
-    #chiper.decode()
-    #chiper_m.extend(chiper)
-    print(chiper)
-    '''
 
 
-'''
-chiper_m.decode('utf-8')
-print(chiper_m)
 
-#16진수로 병경후 바이트형으로 변경
-'''
+print(plain_text)
+
