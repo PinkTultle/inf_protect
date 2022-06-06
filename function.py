@@ -1,4 +1,5 @@
 #기능들 함수로 구현
+from matplotlib.pyplot import close
 import pandas as pd
 
 def SBOX(message,way): #message는 1바이트값 범위는 1~255, way가 'en'이면 암호화 'dec'면 복호화
@@ -36,7 +37,7 @@ bb = bytes(a,'utf-8')
 print('인코딩 : ',end = '')
 print(bb)
 
-chiper_m = bytearray()
+chiper_m = []
 
 for i in range(len(bb)) :
     d = SBOX(bb[i],'en')
@@ -45,12 +46,26 @@ for i in range(len(bb)) :
     d = PBOX_left(d,1)
     print('pbox :',end = '')
     print(d)
-    '''
-    chiper = (d).to_bytes(1, byteorder="little")
-    chiper.decode()
-    chiper_m.extend(chiper)
-    print(chiper_m)
+    chiper_m.append(chr(d))
+    
+chiper_m = ''.join(chiper_m)
+print(chiper_m)
 
+f = open("암호.txt", 'w', encoding= 'utf-8')
+f.write(chiper_m)
+f.close()
+
+
+#디코딩 복호화 마지막 단계에서 사용
+'''
+    chiper = (d).to_bytes(1, byteorder="little")
+    #chiper.decode()
+    #chiper_m.extend(chiper)
+    print(chiper)
+    '''
+
+
+'''
 chiper_m.decode('utf-8')
 print(chiper_m)
 
