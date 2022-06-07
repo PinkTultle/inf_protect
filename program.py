@@ -97,7 +97,6 @@ def encryption(): #암호화 함수
     for i in range(7) :  #라운드 키 생성 함수 여기서 6라운드까지 라운드키 미리생성   
         RandomKey = random.randint(0,255)
         RoundKey.append(GOXOR(first_round_key, RandomKey))
-    print(RoundKey)
     
 
     for k in range(0,6) : #6라운드를 위한 반복문
@@ -111,20 +110,14 @@ def encryption(): #암호화 함수
             break
 
         for i in range(len(encoded_text)) : #1~5라운드
-            print(encoded_text[i], end= '/')
             Encrypting = GOXOR(encoded_text[i],RoundKey[k]) #라운드의 첫번째 XOR
-            print(Encrypting, end= '/')
             passSbox = SBOX(Encrypting,'en') #S-BOX통과
-            print(passSbox, end= '/')
             passPbox = PBOX_left(passSbox,2) #P-BOX통과 >>두번쨰 매게 변수는 시프트 횟수
-            print(passPbox, end= '/')
             cipher.extend((passPbox).to_bytes(1, byteorder="little"))
             #S-BOX와 P-BOX를 통과하며 정수로 바뀐 값을 다시 바이트형의 변환
             #동시에 extend를 통해 리스트에 추가
-            print(cipher)
             if i is range(len(encoded_text))[-1] :
                 encoded_text = bytes(cipher)
-                print(encoded_text)
             #다음 라운드를 시작하기위해 이번 라운드에서 암호화 된 암호문을 할당
 
     cipher_text = ''.join(cipher) #완성된 암호문은 리스트기에 join을 통해 문자열로 변환
@@ -136,10 +129,6 @@ def encryption(): #암호화 함수
     f.close()
 
     return cipher_text
-            
-
-encryption()
-
 
 
 
