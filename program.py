@@ -10,15 +10,12 @@
 '''
 
 import random
-import pandas as pd
-from matplotlib.pyplot import close
+import main_function
 import os
 
 #파이썬으로 SPN 구조를 활용한 암호 구현
 
 RoundKey_origin = []           #각 라운드 난수가 담길 리스트1
-
-
 
 
 def init():
@@ -59,34 +56,9 @@ def init():
 # 이 밑은 S-BOX, P-BOX 및 XOR함수 
 #
 
-def GOXOR(message, key):     #XOR 연산 함수
-    return message^key          #두 개의 매개변수의 XOR 연산값을 반환
-
-def SBOX(message,way): #message는 1바이트값 범위는 1~255, way가 'en'이면 암호화 'dec'면 복호화
-    sbox = pd.read_csv('S-BOX.csv',names= ['of','after'],header=None) #csv파일을 데이터프레임에 삽입
-    if way == 'en': #암호화
-        return int(sbox.iloc[message,1])
-    if way == 'dec': #복호화
-        h = sbox[sbox['after'] == message]
-        return int(h.iloc[0,0])
-        
-def PBOX_left(message,num):#왼쪽 시프트일때 비트가 왼쪽으로 오버하여 값손상시 -255처리 
-    for i in range(num) : 
-        message <<= 1
-        if message >= 255 : #왼쪽 시프트시 1이 시프트 되면 앞에 1비트가 늘어난다 이때 맨앞의 비트는 256
-            message -= 255  #즉 255를 빼주면 남은 1비트는 1자리에 붙게 된다.
-    return message
 
             
-def PBOX_right(message,num): #오른쪽 비트 시프트 첫 자리 1인지 판단하여 1일 경우 True값
-                             #True일 경우 오른쪽으로 시프트하여 값이 손실될때마다 or연산으로 순환구현
-    for i in range(num) :
-        if message & 0b00000001 == 1:    state = True 
-        else : state = False  #AND연산으로 맨뒤의 값dl 1이면 
-        message >>= 1
-        if state == True :
-            message |= 0b10000000
-    return message
+
 
 
 def encryption(let_cich): #암호화 함수
@@ -160,33 +132,31 @@ def decryption(): #복호화 함수
 
     for i in range(6) :  #복호화 키 생성 함수 여기서 6라운드까지 복호화 키 XOR  
         decryption_Key.append(GOXOR(first_round_key, RoundKey_origin[i]))
-
-    #plain_text = bytearray() 
-    plain = []
+ 
+    plain = [] 
 
     for i in range(6):
         
         plain_d = []
 
-        if i == 0 :
-            for k in range(len(cipher_text)) :
-                Decryption_Initial = SBOX(ord(cipher_text[k]), 'dec')
+        if i == 0 : #복호화 1라운드 -> 암호화 마지막 라운드 복호과정
+            for k in range(len(cipher_text)) : 
+                Decryption_Initial = SBOX(ord(cipher_text[k]), 'dec') 
                 plain.append(GOXOR(Decryption_Initial,decryption_Key[-1]))
         
         else :
-            
-            for k in range(len(plain)) :
+            for k in range(len(plain)) : #암호화 역순  P-BOX -> S-BOX -> XOR연산순서
                 passPbox = PBOX_right(plain[k], 2)
                 passSbox = SBOX(passPbox, 'dec')
                 end_decryption = GOXOR(passSbox,decryption_Key[-(i+1)])
-                plain_d.append(end_decryption)
+                plain_d.append(end_decryption) #매 라운드 마다 리스트에 저장후 리스트 초기화
                 if k is range(len(plain))[-1] :
                     plain = plain_d
 
         if i == range(6)[-1] :
-            plain_text = bytes(plain)
+            plain_text = bytes(plain) #마지막 리스트를 바이트형으로 변경
     try :
-        Decryption_text = plain_text.decode()
+        Decryption_text = plain_text.decode() #바이트형 디코더하여 문자열로 변환
         print(Decryption_text)
     except :
         print('비밀번호가 일치하지 않습니다.')
@@ -211,9 +181,4 @@ def school_price(): #학교 교가 입력
     print('교가 암호화를 완료했습니다')
 
 init()
-
-
-
-
-    
 
