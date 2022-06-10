@@ -10,12 +10,14 @@
 '''
 
 import random
-import main_function
+from main_function import *
+from file_in_out import *
 import os
 
-#파이썬으로 SPN 구조를 활용한 암호 구현
 
 RoundKey_origin = []           #각 라운드 난수가 담길 리스트1
+
+#파이썬으로 SPN 구조를 활용한 암호 구현
 
 
 def init():
@@ -36,8 +38,9 @@ def init():
         st = int(input('>> '))
 
         if st == 1 :
+            fileName = input('생성할 암호 파일의 이름을 입력하시오.\n>>')
             let_cich = input('암호화할 평문을 입력허시오.\n>>')
-            encryption(let_cich) #암호화 함수
+            encryption(let_cich,fileName) #암호화 함수
         elif st == 2 : 
             decryption() #복호화 함수
         elif st == 3 :
@@ -56,14 +59,10 @@ def init():
 # 이 밑은 S-BOX, P-BOX 및 XOR함수 
 #
 
-
-            
-
-
-
-def encryption(let_cich): #암호화 함수
-    plain_text = let_cich  #평문 입력
-    encoded_text = bytes(plain_text,'utf-8') #utf-8로 인코딩하며 바이트형 전환
+def encryption(let_cich,name): #암호화 함수
+    encoded_text = bytes(let_cich,'utf-8') #utf-8로 인코딩하며 바이트형 전환
+    print('인코딩값 : ',end= '')
+    print(encoded_text)
 
     while True :
         try :
@@ -78,23 +77,25 @@ def encryption(let_cich): #암호화 함수
                 print('지정 범위내의 수를 입력해주세요') 
 
     RoundKey = []
+   
 
     for i in range(6) :  #라운드 키 생성 함수 여기서 6라운드까지의 난수 미리 생성 
-        RandomKey = random.randint(0,255)
-        RoundKey_origin.append(RandomKey)
-        RoundKey.append(GOXOR(first_round_key,RoundKey_origin[i]))
+            RandomKey = random.randint(0,255)
+            RoundKey_origin.append(RandomKey)
+            RoundKey.append(GOXOR(first_round_key,RoundKey_origin[i]))
         #암호화때 쓰는 라운드키 XOR 연산후 리스트에 추가
-        
-
-    
+    print('라운드 키값 :',end='')
+    print(RoundKey)
 
     for k in range(6) : #6라운드를 위한 반복문
         cipher = [] #매라운드마다 암호값을 저장할 리스트
+        print('라운드', k+1)
+
         if k is range(0,6)[-1] : #마지막 라운드는 XOR연산과 S-BOX만 사용
             for i in range(len(encoded_text)) :
                 Encrypting = GOXOR(encoded_text[i],RoundKey[k])
                 passSbox = SBOX(Encrypting,'en')
-                cipher.extend(chr(passSbox)) #암호화된 각 문자를 문자열로 리스트에 저장
+                cipher.append(passSbox)
             break
 
         for i in range(len(encoded_text)) : #1~5라운드
@@ -108,23 +109,21 @@ def encryption(let_cich): #암호화 함수
                 encoded_text = bytes(cipher)
             #다음 라운드를 시작하기위해 이번 라운드에서 암호화 된 암호문을 할당
 
-    cipher_text = ''.join(cipher) #완성된 암호문은 리스트기에 join을 통해 문자열로 변환
     
-
-    #암호문을 '암호.txt'에 저장
-    f = open("암호.txt", 'w', encoding= 'utf-8')
-    f.write(cipher_text)
-    f.close()
+    cipher_byte = bytes(cipher)
+    
+    make_binary_file(cipher_byte,name)
 
     print('암호문 생성 완료!!')
 
-    return cipher_text
+    return
 
 def decryption(): #복호화 함수
 
-    f = open("암호.txt", 'r', encoding= 'utf-8') #암호.txt에 저장된 암호문을 불러온다
-    cipher_text = f.read()
-    f.close()
+    name = input('복호화할 암호파일의 이름을 입력하시오\n>>')
+
+    cipher_text = read_binary_file(name)
+
 
     first_round_key = int(input('암호문을 복호화하기 위한 비밀번호를 입력하시오(범위 0~255)\n>>'))
 
@@ -141,7 +140,7 @@ def decryption(): #복호화 함수
 
         if i == 0 : #복호화 1라운드 -> 암호화 마지막 라운드 복호과정
             for k in range(len(cipher_text)) : 
-                Decryption_Initial = SBOX(ord(cipher_text[k]), 'dec') 
+                Decryption_Initial = SBOX(cipher_text[k], 'dec') 
                 plain.append(GOXOR(Decryption_Initial,decryption_Key[-1]))
         
         else :
@@ -156,15 +155,15 @@ def decryption(): #복호화 함수
         if i == range(6)[-1] :
             plain_text = bytes(plain) #마지막 리스트를 바이트형으로 변경
     try :
-        Decryption_text = plain_text.decode() #바이트형 디코더하여 문자열로 변환
-        print(Decryption_text)
+        Decryption_text = plain_text.decode('utf-8') #바이트형 디코더하여 문자열로 변환
+        make_txt_file(Decryption_text,name)
     except :
         print('비밀번호가 일치하지 않습니다.')
         return
+    else :
+        print('복호화를 완료 하였습니다!')
 
-    return Decryption_text
-
-
+    return 
 
 def Confirm(): #암호문 확인
     f = open("암호.txt", 'r', encoding= 'utf-8') #암호.txt에 저장된 암호문을 불러온다
@@ -176,7 +175,7 @@ def Confirm(): #암호문 확인
 
 def school_price(): #학교 교가 입력
     school_song = '하늘을 한 가슴에 푸르게 안고 산맥을 다스리며 꿈길 여는 곳 새 역사 문을 여는 학문의 요람 크나큰 우리보람 겨레의 자랑 영원속에 진리의 뿌리 내리고 진리 정의 창의를 피속에 키워 동의대학교 그 품에다 영광 다진다'
-    encryption(school_song)
+    encryption(school_song,'교가')
 
     print('교가 암호화를 완료했습니다')
 

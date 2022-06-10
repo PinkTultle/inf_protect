@@ -1,3 +1,6 @@
+#S-BOX / P-BOX / XOR 연산 
+#주요 암호화 기술을 함수로 만들어 놓은 파일
+
 import pandas as pd
 
 def GOXOR(message, key):     #XOR 연산 함수
